@@ -1,0 +1,55 @@
+version: "3"
+services:
+  iviche_back:
+    image: registry.gitlab.com/dewais/iviche-back:stage-200504030359
+    environment:
+      DB_HOST: private-iviche-stage-db-postgresql-fra1-do-user-6643951-0.a.db.ondigitalocean.com
+      DB_PORT: 25061
+      DB_USER: doadmin
+      DB_PASSWORD: x4grwqx1tob58el1
+      DB_NAME: iviche-stage-psql-pool
+      SERVER_PORT: 5000
+
+      LOGGING_OUTPUT_DIR: /logs
+      LOGGING_CONSOLE_ENABLED: "false"
+      LOGGING_FILES_ENABLED: "true"
+      LOGGING_LEVEL: info
+      LOGGING_EXPRESS_REQ_LEVEL: error
+
+      JWT_SECRET: supersecret
+
+      INTEL_TELE_API_KEY: 2XMsPGTDvVFiRGQO
+
+      SMTP_HOST: host
+      SMTP_USER: user
+      SMTP_PASSWORD: pass
+
+      EMAIL_CONFIRMATION_REDIRECT_URL: "/email-confirmation"
+      EMAIL_CONFIRMATION_REDIRECT_EXPIRED_URL: "/email-confirmation-expired"
+
+      GOOGLE_CLIENT_ID: client_id
+
+      ELASTIC_HOST: "http://10.114.0.2:9200"
+
+      TEST_DATA_GENERATOR_VOTES_MULTIPLIER: 10
+
+      VOTER_SEED_SECRET: votersecret
+
+      WP_URL: http://iveche.1gb.ua/wp-json/iviche/v2
+      
+      IP_SERVICE_KEY: 298024
+      IP_SERVICE_LICENSE: "bs8y2DLeAvYkOBnM"
+
+      TELEGRAM_BOT_TOKEN: "1459653733:AAFuaEjIFlNoVRFTopPY_Y56i5oPM1l26sg"
+      TELEGRAM_CHANNEL_ID: "-1001417821666"
+
+      EMAIL_REDIRECT_LINK: "/user-profile/my-profile/email-confirmation"
+      RESET_PASSWORD_REDIRECT_LINK: "/password/reset"
+
+      SERVER_URL: "https://stage.iviche.com"
+
+    volumes:
+      - ./logs:/logs
+    ports:
+      - "5000:5000"
+    command: npm run prod

@@ -1,0 +1,176 @@
+{
+  "family": "iviche-back",
+  "networkMode": "awsvpc",
+  "taskRoleArn": "arn:aws:iam::676948242262:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::676948242262:role/ecsTaskExecutionRole",
+  "cpu": "1024",
+  "memory": "2048",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "containerDefinitions": [{
+    "name": "back-app",
+    "image": "676948242262.dkr.ecr.eu-central-1.amazonaws.com/iviche-back:latest",
+    "essential": true,
+    "portMappings": [{
+      "hostPort": 5000,
+      "protocol": "tcp",
+      "containerPort": 5000
+    }],
+    "entryPoint": [
+      "sh",
+      "-c"
+    ],
+    "command": [
+      "mkdir -p /logs && npm run prod"
+    ],
+    "cpu": 1024,
+    "memoryReservation": 2048,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/iviche-back",
+        "awslogs-region": "eu-central-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "environment": [{
+        "name": "DB_HOST",
+        "value": "iviche.cqecpfarhksf.eu-central-1.rds.amazonaws.com"
+      },
+      {
+        "name": "DB_NAME",
+        "value": "iviche"
+      },
+      {
+        "name": "DB_PORT",
+        "value": "5432"
+      },
+      {
+        "name": "DB_USER",
+        "value": "iviche_user"
+      },
+      {
+        "name": "ELASTIC_HOST",
+        "value": "https://vpc-docker-cluster-rj6detdxn5zkhfhl5z4drrbdzi.eu-central-1.es.amazonaws.com"
+      },
+      {
+        "name": "ELASTIC_HOST_TEST",
+        "value": "https://vpc-docker-cluster-rj6detdxn5zkhfhl5z4drrbdzi.eu-central-1.es.amazonaws.com"
+      },
+      {
+        "name": "EMAIL_CONFIRMATION_REDIRECT_URL",
+        "value": "/email-confirmation"
+      },
+      {
+        "name": "EMAIL_CONFIRMATION_REDIRECT_EXPIRED_URL",
+        "value": "/email-confirmation-expired"
+      },
+      {
+        "name": "INTEL_TELE_API_KEY",
+        "value": "2XMsPGTDvVFiRGQO"
+      },
+      {
+        "name": "IP_SERVICE_KEY",
+        "value": "298024"
+      },
+      {
+        "name": "IP_SERVICE_LICENSE",
+        "value": "bs8y2DLeAvYkOBnM"
+      },
+      {
+        "name": "TELEGRAM_BOT_TOKEN",
+        "value": "1466624786:AAEBaj4GpcaPSFlYgYVNJM0W3F5uIu8LhwQ"
+      },
+      {
+        "name": "TELEGRAM_CHANNEL_ID",
+        "value": "-1001366365207"
+      },
+      {
+        "name": "LOGGING_CONSOLE_ENABLED",
+        "value": "true"
+      },
+      {
+        "name": "LOGGING_EXPRESS_REQ_LEVEL",
+        "value": "error"
+      },
+      {
+        "name": "LOGGING_FILES_ENABLED",
+        "value": "false"
+      },
+      {
+        "name": "LOGGING_LEVEL",
+        "value": "info"
+      },
+      {
+        "name": "LOGGING_OUTPUT_DIR",
+        "value": "/logs"
+      },
+      {
+        "name": "SERVER_PORT",
+        "value": "5000"
+      },
+      {
+        "name": "SERVER_URL",
+        "value": "https://iviche.com"
+      },
+      {
+        "name": "SMTP_HOST",
+        "value": "smtp.gmail.com"
+      },
+      {
+        "name": "SMTP_USER",
+        "value": "no-reply@iviche.com"
+      },
+      {
+        "name": "TEST_DATA_GENERATOR_VOTES_MULTIPLIER",
+        "value": "10"
+      },
+      {
+        "name": "WP_URL",
+        "value": "http://wp.iviche.com/wp-json/iviche/v2"
+      },
+      {
+        "name": "EMAIL_REDIRECT_LINK",
+        "value": "/user-profile/my-profile/email-confirmation"
+      },
+      {
+        "name": "RESET_PASSWORD_REDIRECT_LINK",
+        "value": "/password/reset"
+      }
+    ],
+    "secrets": [{
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/front_google",
+        "name": "GOOGLE_CLIENT_ID"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/jwt_secret",
+        "name": "JWT_SECRET"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/voter_seed_secret",
+        "name": "VOTER_SEED_SECRET"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/DB_PASS",
+        "name": "DB_PASSWORD"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/smtp_password",
+        "name": "SMTP_PASSWORD"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/firebase_project_id",
+        "name": "FIREBASE_PROJECT_ID"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/firebase_client_email",
+        "name": "FIREBASE_CLIENT_EMAIL"
+      },
+      {
+        "valueFrom": "arn:aws:ssm:eu-central-1:676948242262:parameter/firebase_private_key",
+        "name": "FIREBASE_PRIVATE_KEY"
+      }
+    ]
+  }]
+}

@@ -1,0 +1,6 @@
+export enum IssueType {
+  COMPLAINT = 'COMPLAINT',
+  PROPOSAL = 'PROPOSAL',
+  QUESTION = 'QUESTION',
+  REQUEST = 'REQUEST',
+}

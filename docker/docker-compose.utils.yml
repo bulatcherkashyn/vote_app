@@ -1,0 +1,14 @@
+version: "3"
+services:
+  kibana:
+    image: kibana:7.4.2
+    container_name: "kibana"
+    ports:
+      - "5601:5601"
+    networks:
+      - kibana
+
+networks:
+  kibana:
+    external:
+      name: docker_elastic

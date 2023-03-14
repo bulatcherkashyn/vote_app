@@ -1,0 +1,10 @@
+cluster.name: "docker-cluster"
+network.host: 0.0.0.0
+discovery.type: "single-node"
+
+path.data: /home/es/data
+path.logs: /home/es/logs
+
+http.cors.allow-origin: "*"
+http.cors.allow-headers: "Authorization"
+http.cors.enabled: true

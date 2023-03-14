@@ -1,0 +1,15 @@
+FROM node:12.14
+
+WORKDIR /app
+
+COPY config ./config
+COPY database ./database
+COPY src ./src
+ADD package*.json ./
+COPY tsconfig.json ./
+COPY .npmrc ./
+
+RUN npm install
+RUN npm run build
+
+# CMD npm run prod

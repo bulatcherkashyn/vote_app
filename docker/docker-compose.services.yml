@@ -1,0 +1,29 @@
+networks:
+  elastic:
+    driver: bridge
+
+version: "3"
+services:
+  iviche_db:
+    image: postgres:11.5-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgresroot
+      POSTGRES_DB: iviche_voting
+    volumes:
+      - "./dbdata:/var/lib/postgresql/data"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+    container_name: "elasticsearch"
+    networks:
+      - elastic
+    volumes:
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elastic_data/data:/home/es/data
+      - ./elastic_data/logs:/home/es/logs
+      - ./plugins:/usr/share/elasticsearch/plugins
+    ports:
+      - "9200:9200"

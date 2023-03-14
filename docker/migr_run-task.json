@@ -1,0 +1,19 @@
+{
+  "cluster": "iviche",
+  "group": "migration",
+  "taskDefinition": "iviche-migration",
+  "count": 1,
+  "launchType": "FARGATE",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-0993fbc34fd3631a2",
+        "subnet-0fe2d62e27b3ba622"
+      ],
+      "securityGroups": [
+        "sg-0c141453ee6fd64e1"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  }
+}

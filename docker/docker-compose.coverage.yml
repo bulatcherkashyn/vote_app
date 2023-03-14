@@ -1,0 +1,54 @@
+version: "3"
+services:
+  node:
+    image: "node:12.13"
+    user: "node"
+    working_dir: /builds/dewais/iviche-back
+    networks:
+      - esnet
+    links:
+      - elasticsearch_test
+    depends_on:
+      - iviche_db_test
+    volumes:
+      - ../:/builds/dewais/iviche-back
+    environment:
+      - DB_HOST_I9N=iviche_db_test
+      - DB_PORT_I9N=5432
+      - LOGGING_CONSOLE_ENABLED=true
+      - LOGGING_FILES_ENABLED=false
+      - ELASTIC_HOST_TEST=http://elasticsearch_test:9200
+    command: bash -c "sleep 20 && npm run test:coverage"
+
+  iviche_db_test:
+    image: postgres:11.5-alpine
+    networks:
+      - esnet
+    ports:
+      - "2345:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass4test
+      POSTGRES_DB: iviche_voting_test
+
+  elasticsearch_test:
+    container_name: elasticsearch_test
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.2
+    networks:
+      - esnet
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    logging:
+      driver: none
+    ports:
+      - "9300:9200"
+
+networks:
+  esnet:
+    driver: bridge

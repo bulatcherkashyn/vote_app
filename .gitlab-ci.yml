@@ -1,0 +1,110 @@
+stages:
+  - pre
+  - simple-test
+  - i9n
+  - publish-image-stage
+  - publish-image-prod
+  - deploy-service
+
+cache:
+  paths:
+    - node_modules/
+
+install_dependencies:
+  image: node:12.14
+  stage: pre
+  script:
+    - npm i
+
+  artifacts:
+    paths:
+      - node_modules/
+
+production_build:
+  image: node:12.14
+  stage: simple-test
+  script:
+    - npm run build
+
+lint:
+  image: node:12.14
+  stage: simple-test
+  script:
+    - npm run lint
+
+unit_tests:
+  image: node:12.14
+  stage: simple-test
+  script:
+    - npm t
+
+coverage_tests:
+  image: tmaier/docker-compose:latest
+  services:
+    - docker:dind
+  stage: i9n
+  script:
+    - ./run-test-coverage.sh
+
+
+publish-image-stage:
+  stage: publish-image-stage
+  image: docker:19.03.8
+  services:
+    - docker:19.03.8-dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -f docker/Dockerfile.prod -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /stage-.*/ || $CI_COMMIT_TAG =~ /release-.*/'
+      when: always
+    
+
+publish-image-prod:
+  stage: publish-image-prod
+  image: docker:19.03.8
+  services:
+    - docker:19.03.8-dind
+  variables:
+#    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    IMAGE_AWS_TAG: $AWS_IMAGE_REGISTRY:$CI_COMMIT_SHORT_SHA
+  script:
+#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - apk add python3
+    - apk add curl
+    - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+    - unzip awscli-bundle.zip
+    - /usr/bin/python3.8 awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+    - $(aws ecr get-login --no-include-email)
+    - docker build -f docker/Dockerfile.prod -t $IMAGE_AWS_TAG .
+    - docker push $IMAGE_AWS_TAG
+#  rules:
+#    - if: '$CI_COMMIT_TAG =~ /stage-.*/ || $CI_COMMIT_TAG =~ /release-.*/'
+#      when: always
+  only:
+    - production
+
+deploy-service:
+  stage: deploy-service
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  variables:
+    IMAGE_AWS_TAG: $AWS_IMAGE_REGISTRY:$CI_COMMIT_SHORT_SHA
+  script:
+    - sed -i "s|$AWS_IMAGE_REGISTRY:latest|$IMAGE_AWS_TAG|g" docker/migr_task_definition.json
+    - sed -i "s|$AWS_IMAGE_REGISTRY:latest|$IMAGE_AWS_TAG|g" docker/back_task_definition.json
+    - sed -i "s|$AWS_IMAGE_REGISTRY:latest|$IMAGE_AWS_TAG|g" docker/cron_task_definition.json
+    #migration
+    - aws ecs register-task-definition --cli-input-json file://docker/migr_task_definition.json
+    - aws ecs run-task --cli-input-json file://docker/migr_run-task.json
+    - sleep 60
+    #back cron task deploy
+    - aws ecs register-task-definition --cli-input-json file://docker/back_task_definition.json
+    - aws ecs register-task-definition --cli-input-json file://docker/cron_task_definition.json
+    #back cron service update         --platform-version "LATEST"
+    - aws ecs update-service --cluster iviche --service back --task-definition iviche-back --desired-count 1 --force-new-deployment
+    - aws ecs update-service --cluster iviche --service cronjobs --task-definition iviche-cron-jobs --desired-count 1 --force-new-deployment
+  only:
+    - production
